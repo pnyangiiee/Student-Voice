@@ -347,7 +347,28 @@
 
   <script>
   // Add optional anonymous submission. Records are still kept in memory in this stage.
-  const feedbackList = [];
+  const STORAGE_KEY = "studentVoiceFeedback";
+  function loadFeedback() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error("Could not read feedback:", error);
+      return [];
+    }
+  }
+  function saveFeedback(records) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      return true;
+    } catch (error) {
+      console.error("Could not save feedback:", error);
+      alert("Could not save. Check browser storage settings.");
+      return false;
+    }
+  }
+  let feedbackList = loadFeedback();
   const form = document.getElementById("feedbackForm");
   const tableBody = document.getElementById("feedbackTableBody");
   const studentView = document.getElementById("studentView");
@@ -400,6 +421,7 @@
       anonymous: isAnonymous, studentName: isAnonymous ? "" : studentName.value.trim(),
       studentId: isAnonymous ? "" : studentId.value.trim(), status: "Pending", createdAt: new Date().toISOString()
     });
+    if (!saveFeedback(feedbackList)) return;
     form.reset();
     anonymous.checked = true;
     updateIdentityFields();
