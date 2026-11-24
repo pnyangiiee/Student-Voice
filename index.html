@@ -239,28 +239,13 @@
               </div>
 
               <div class="field">
-                <div class="anonymous-box">
-                  <input id="anonymous" name="anonymous" type="checkbox" checked>
-                  <div>
-                    <strong>Submit anonymously</strong>
-                    <p>Your name and student ID will not be included in this submission. You can uncheck this option to identify yourself.</p>
-                  </div>
-                </div>
-                <div class="identity-fields" id="identityFields" hidden>
-                  <div class="two-col">
-                    <div class="field" style="margin:0">
-                      <label for="studentName">Full name <span class="required">*</span></label>
-                      <input class="input" id="studentName" name="studentName" type="text" maxlength="80" placeholder="Your full name" disabled>
-                    </div>
-                    <div class="field" style="margin:0">
-                      <label for="studentId">Student ID <span style="color:#8791a3;font-weight:500">(optional)</span></label>
-                      <input class="input" id="studentId" name="studentId" type="text" maxlength="30" placeholder="Your student ID" disabled>
-                    </div>
-                  </div>
-                  <span class="hint">Only provide identifying details if you are comfortable being identified.</span>
-                </div>
+                <label for="studentName">Full name</label>
+                <input class="input" id="studentName" name="studentName" type="text" maxlength="80" required>
               </div>
-
+              <div class="field">
+                <label for="studentId">Student ID (optional)</label>
+                <input class="input" id="studentId" name="studentId" type="text" maxlength="30">
+              </div>
               <div class="form-actions">
                 <button class="btn btn-secondary" id="clearFormButton" type="button">Clear form</button>
                 <button class="btn btn-primary" type="submit">Submit feedback <span aria-hidden="true">→</span></button>
@@ -345,5 +330,57 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  </body>
+  <script>
+  // First working version: validate the form and keep records in memory.
+  const feedbackList = [];
+  const form = document.getElementById("feedbackForm");
+  const tableBody = document.getElementById("feedbackTableBody");
+  const studentView = document.getElementById("studentView");
+  const adminView = document.getElementById("adminView");
+
+  function showView(view) {
+    const showAdmin = view === "admin";
+    studentView.hidden = showAdmin;
+    adminView.hidden = !showAdmin;
+    document.getElementById("studentTab").classList.toggle("active", !showAdmin);
+    document.getElementById("adminTab").classList.toggle("active", showAdmin);
+    if (showAdmin) renderFeedback();
+  }
+
+  function renderFeedback() {
+    tableBody.innerHTML = feedbackList.map(item => `
+      <tr>
+        <td><strong>${item.subject}</strong><small>${item.category}</small></td>
+        <td>${item.type}</td><td>${item.studentName}</td>
+        <td>${new Date(item.createdAt).toLocaleDateString()}</td>
+        <td>${item.status}</td><td>Saved in this page session</td>
+      </tr>
+    `).join("");
+    document.getElementById("totalCount").textContent = feedbackList.length;
+    document.getElementById("pendingCount").textContent = feedbackList.filter(item => item.status === "Pending").length;
+    document.getElementById("reviewCount").textContent = "0";
+    document.getElementById("resolvedCount").textContent = "0";
+    document.getElementById("feedbackTableWrap").hidden = feedbackList.length === 0;
+    document.getElementById("emptyState").hidden = feedbackList.length > 0;
+  }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    feedbackList.unshift({
+      id: "FB-" + Date.now(), type: data.get("type"), category: data.get("category"),
+      subject: data.get("subject").trim(), description: data.get("description").trim(),
+      studentName: data.get("studentName").trim(), studentId: data.get("studentId").trim(),
+      status: "Pending", createdAt: new Date().toISOString()
+    });
+    form.reset();
+    renderFeedback();
+    alert("Feedback submitted successfully. Open the Admin Dashboard to review it.");
+  });
+
+  document.getElementById("studentTab").addEventListener("click", () => showView("student"));
+  document.getElementById("adminTab").addEventListener("click", () => showView("admin"));
+</script>
+</body>
 </html>
