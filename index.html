@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Voice</title>
+</head>
+<body>
+  <header>
+    <h1>Student Voice</h1>
+    <p>Student Complaint and Suggestion Box</p>
+  </header>
+  <main>
+    <h2>Submit your feedback</h2>
+    <form id="feedbackForm">
+      <fieldset>
+        <legend>Feedback type</legend>
+        <label><input type="radio" name="type" value="Complaint" checked> Complaint</label>
+        <label><input type="radio" name="type" value="Suggestion"> Suggestion</label>
+      </fieldset>
+      <p>
+        <label for="category">Category</label><br>
+        <select id="category" name="category" required>
+          <option value="">Choose a category</option>
+          <option>Classroom and Facilities</option>
+          <option>Cleanliness and Sanitation</option>
+          <option>Teaching and Learning</option>
+          <option>Student Services</option>
+          <option>School Activities</option>
+          <option>Safety and Security</option>
+          <option>Other</option>
+        </select>
+      </p>
+      <p>
+        <label for="subject">Subject</label><br>
+        <input id="subject" name="subject" type="text" maxlength="90" required>
+      </p>
+      <p>
+        <label for="description">Description</label><br>
+        <textarea id="description" name="description" minlength="10" maxlength="1500" required></textarea>
+      </p>
+      <button type="submit">Submit feedback</button>
+    </form>
+  </main>
+</body>
+</html>
