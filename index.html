@@ -239,13 +239,28 @@
               </div>
 
               <div class="field">
-                <label for="studentName">Full name</label>
-                <input class="input" id="studentName" name="studentName" type="text" maxlength="80" required>
+                <div class="anonymous-box">
+                  <input id="anonymous" name="anonymous" type="checkbox" checked>
+                  <div>
+                    <strong>Submit anonymously</strong>
+                    <p>Your name and student ID will not be included in this submission. You can uncheck this option to identify yourself.</p>
+                  </div>
+                </div>
+                <div class="identity-fields" id="identityFields" hidden>
+                  <div class="two-col">
+                    <div class="field" style="margin:0">
+                      <label for="studentName">Full name <span class="required">*</span></label>
+                      <input class="input" id="studentName" name="studentName" type="text" maxlength="80" placeholder="Your full name" disabled>
+                    </div>
+                    <div class="field" style="margin:0">
+                      <label for="studentId">Student ID <span style="color:#8791a3;font-weight:500">(optional)</span></label>
+                      <input class="input" id="studentId" name="studentId" type="text" maxlength="30" placeholder="Your student ID" disabled>
+                    </div>
+                  </div>
+                  <span class="hint">Only provide identifying details if you are comfortable being identified.</span>
+                </div>
               </div>
-              <div class="field">
-                <label for="studentId">Student ID (optional)</label>
-                <input class="input" id="studentId" name="studentId" type="text" maxlength="30">
-              </div>
+
               <div class="form-actions">
                 <button class="btn btn-secondary" id="clearFormButton" type="button">Clear form</button>
                 <button class="btn btn-primary" type="submit">Submit feedback <span aria-hidden="true">→</span></button>
@@ -331,12 +346,24 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-  // First working version: validate the form and keep records in memory.
+  // Add optional anonymous submission. Records are still kept in memory in this stage.
   const feedbackList = [];
   const form = document.getElementById("feedbackForm");
   const tableBody = document.getElementById("feedbackTableBody");
   const studentView = document.getElementById("studentView");
   const adminView = document.getElementById("adminView");
+  const anonymous = document.getElementById("anonymous");
+  const identityFields = document.getElementById("identityFields");
+  const studentName = document.getElementById("studentName");
+  const studentId = document.getElementById("studentId");
+
+  function updateIdentityFields() {
+    identityFields.hidden = anonymous.checked;
+    studentName.disabled = anonymous.checked;
+    studentId.disabled = anonymous.checked;
+    studentName.required = !anonymous.checked;
+    if (anonymous.checked) { studentName.value = ""; studentId.value = ""; }
+  }
 
   function showView(view) {
     const showAdmin = view === "admin";
@@ -349,12 +376,9 @@
 
   function renderFeedback() {
     tableBody.innerHTML = feedbackList.map(item => `
-      <tr>
-        <td><strong>${item.subject}</strong><small>${item.category}</small></td>
-        <td>${item.type}</td><td>${item.studentName}</td>
-        <td>${new Date(item.createdAt).toLocaleDateString()}</td>
-        <td>${item.status}</td><td>Saved in this page session</td>
-      </tr>
+      <tr><td><strong>${item.subject}</strong><small>${item.category}</small></td>
+      <td>${item.type}</td><td>${item.anonymous ? "Anonymous" : item.studentName}</td>
+      <td>${new Date(item.createdAt).toLocaleDateString()}</td><td>${item.status}</td><td>Saved in this page session</td></tr>
     `).join("");
     document.getElementById("totalCount").textContent = feedbackList.length;
     document.getElementById("pendingCount").textContent = feedbackList.filter(item => item.status === "Pending").length;
@@ -364,23 +388,28 @@
     document.getElementById("emptyState").hidden = feedbackList.length > 0;
   }
 
+  anonymous.addEventListener("change", updateIdentityFields);
   form.addEventListener("submit", event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     const data = new FormData(form);
+    const isAnonymous = anonymous.checked;
     feedbackList.unshift({
       id: "FB-" + Date.now(), type: data.get("type"), category: data.get("category"),
       subject: data.get("subject").trim(), description: data.get("description").trim(),
-      studentName: data.get("studentName").trim(), studentId: data.get("studentId").trim(),
-      status: "Pending", createdAt: new Date().toISOString()
+      anonymous: isAnonymous, studentName: isAnonymous ? "" : studentName.value.trim(),
+      studentId: isAnonymous ? "" : studentId.value.trim(), status: "Pending", createdAt: new Date().toISOString()
     });
     form.reset();
+    anonymous.checked = true;
+    updateIdentityFields();
     renderFeedback();
-    alert("Feedback submitted successfully. Open the Admin Dashboard to review it.");
+    alert("Feedback submitted successfully.");
   });
 
   document.getElementById("studentTab").addEventListener("click", () => showView("student"));
   document.getElementById("adminTab").addEventListener("click", () => showView("admin"));
+  updateIdentityFields();
 </script>
 </body>
 </html>
