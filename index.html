@@ -3,45 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Voice</title>
+  <title>Student Voice | Feedback Portal</title>
+  <style>
+    :root {
+      --blue: #2457d6;
+      --blue-dark: #1946b8;
+      --blue-soft: #edf3ff;
+      --ink: #17233b;
+      --muted: #69758b;
+      --line: #e4e9f1;
+      --surface: #ffffff;
+      --page: #f5f7fb;
+      --green: #16845b;
+      --orange: #a85b12;
+      --red: #b43b45;
+      --shadow: 0 12px 34px rgba(23, 35, 59, .07);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--page); color: var(--ink); }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; }
+    .topbar { background: #fff; border-bottom: 1px solid var(--line); }
+    .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; color: white; background: var(--blue); font-size: 21px; font-weight: 800; box-shadow: 0 6px 14px rgba(36,87,214,.22); }
+    .brand-name { margin: 0; font-size: 18px; letter-spacing: -.35px; }
+    .brand-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+    .nav { display: flex; align-items: center; gap: 6px; padding: 5px; background: #f2f5fa; border-radius: 12px; }
+    .nav-btn { border: 0; background: transparent; color: #58657b; border-radius: 9px; padding: 10px 14px; font-size: 13px; font-weight: 700; }
+    .nav-btn.active { background: #fff; color: var(--blue); box-shadow: 0 2px 8px rgba(23,35,59,.08); }
+    main { padding: 34px 0 52px; }
+    .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 36px); line-height: 1.12; letter-spacing: -1.1px; }
+    .hero-copy { max-width: 670px; margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .privacy-pill { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 10px 13px; border: 1px solid #cfe9dd; border-radius: 999px; color: #176b4c; background: #f0faf5; font-size: 12px; font-weight: 700; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(260px, .75fr); gap: 22px; align-items: start; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+    .panel-head { padding: 23px 25px 18px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 18px; letter-spacing: -.35px; }
+    .panel-head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .form-body { padding: 23px 25px 26px; }
+    .field { margin-bottom: 19px; }
+    .field label, .field-label { display: block; margin-bottom: 8px; color: #34415a; font-size: 13px; font-weight: 750; }
+    .required { color: var(--red); }
+    .input, .select, .textarea { width: 100%; border: 1px solid #dce3ee; border-radius: 10px; background: #fff; color: var(--ink); outline: none; transition: border-color .15s, box-shadow .15s; }
+    .input, .select { height: 45px; padding: 0 13px; }
+    .textarea { min-height: 132px; padding: 12px 13px; resize: vertical; line-height: 1.55; }
+    .input:focus, .select:focus, .textarea:focus { border-color: #7396ee; box-shadow: 0 0 0 3px rgba(36,87,214,.11); }
+    .hint { display: block; margin-top: 7px; color: #8791a3; font-size: 11px; line-height: 1.5; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .type-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .type-option { display: flex; align-items: center; gap: 11px; min-height: 61px; padding: 12px 14px; border: 1px solid #dce3ee; border-radius: 11px; cursor: pointer; }
+    .type-option:has(input:checked) { border-color: #7396ee; background: var(--blue-soft); }
+    .type-option input { accent-color: var(--blue); width: 16px; height: 16px; }
+    .type-option strong { display: block; font-size: 13px; }
+    .type-option small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .anonymous-box { display: flex; align-items: flex-start; gap: 11px; padding: 15px; border: 1px solid #dce7fb; border-radius: 12px; background: #f7f9ff; }
+    .anonymous-box input { width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--blue); }
+    .anonymous-box strong { display: block; font-size: 13px; }
+    .anonymous-box p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .identity-fields { margin-top: 16px; padding: 16px; border: 1px dashed #dce3ee; border-radius: 12px; background: #fbfcfe; }
+    .identity-fields[hidden] { display: none; }
+    .form-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 23px; }
+    .btn { min-height: 43px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 17px; border: 1px solid transparent; border-radius: 10px; font-size: 13px; font-weight: 750; transition: background .15s, transform .15s; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { color: #fff; background: var(--blue); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-secondary { color: #42516b; background: #fff; border-color: #dce3ee; }
+    .btn-secondary:hover { background: #f7f9fc; }
+    .side-card { padding: 22px; }
+    .side-card + .side-card { margin-top: 18px; }
+    .side-card h3 { margin: 0 0 13px; font-size: 15px; }
+    .step { display: flex; align-items: flex-start; gap: 11px; margin: 14px 0; }
+    .step-num { flex: 0 0 25px; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; color: var(--blue); background: var(--blue-soft); font-size: 11px; font-weight: 800; }
+    .step strong { display: block; font-size: 12px; }
+    .step p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .notice { padding: 13px 14px; color: #78511b; background: #fff8e9; border: 1px solid #f3e2bb; border-radius: 11px; font-size: 11px; line-height: 1.6; }
+    .notice strong { display: block; margin-bottom: 3px; font-size: 12px; }
+    .success-message { display: none; margin: 0 0 18px; padding: 13px 15px; color: #176b4c; background: #effaf4; border: 1px solid #ccebd9; border-radius: 11px; font-size: 13px; line-height: 1.5; }
+    .success-message.show { display: block; }
+    .admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 22px 0 17px; }
+    .admin-toolbar h2 { margin: 0; font-size: 19px; }
+    .admin-toolbar p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin: 19px 0; }
+    .stat { padding: 17px 18px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 5px 18px rgba(23,35,59,.035); }
+    .stat span { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .stat strong { display: block; margin-top: 7px; font-size: 25px; letter-spacing: -.7px; }
+    .filters { display: grid; grid-template-columns: minmax(200px, 1.5fr) minmax(140px, .7fr) minmax(140px, .7fr); gap: 10px; padding: 17px; border-bottom: 1px solid var(--line); }
+    .filters .input, .filters .select { height: 41px; font-size: 12px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 13px 16px; color: #778298; background: #fbfcfe; font-size: 10px; letter-spacing: .7px; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 15px 16px; border-top: 1px solid #edf0f5; color: #3f4c63; font-size: 12px; vertical-align: middle; }
+    .subject-cell strong { display: block; max-width: 270px; overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+    .subject-cell small { display: block; margin-top: 4px; color: #8993a4; font-size: 10px; }
+    .tag { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .tag-complaint { color: #a13b42; background: #fff0f0; }
+    .tag-suggestion { color: #21634d; background: #eaf8f1; }
+    .tag-pending { color: #94600d; background: #fff5df; }
+    .tag-review { color: #3159b7; background: #edf3ff; }
+    .tag-resolved { color: #176b4c; background: #eaf8f1; }
+    .tag-rejected { color: #a13b42; background: #fff0f0; }
+    .status-select { max-width: 145px; height: 34px; padding: 0 8px; border: 1px solid #dce3ee; border-radius: 8px; color: #3f4c63; background: #fff; font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .text-button { padding: 5px 7px; border: 0; color: var(--blue); background: transparent; font-size: 11px; font-weight: 750; }
+    .text-button:hover { text-decoration: underline; }
+    .empty { padding: 48px 18px; text-align: center; }
+    .empty-icon { width: 48px; height: 48px; display: grid; place-items: center; margin: 0 auto 12px; border-radius: 15px; color: var(--blue); background: var(--blue-soft); font-size: 22px; }
+    .empty strong { display: block; font-size: 14px; }
+    .empty p { max-width: 390px; margin: 6px auto 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .admin-note { margin-top: 15px; color: #8791a3; font-size: 11px; line-height: 1.6; }
+    .view[hidden] { display: none; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 20px; background: rgba(15,24,42,.48); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(560px, 100%); max-height: min(80vh, 700px); overflow: auto; padding: 23px; border-radius: 17px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.22); }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 19px; }
+    .modal-head h3 { margin: 0; font-size: 18px; }
+    .close-btn { width: 32px; height: 32px; border: 0; border-radius: 9px; color: #58657b; background: #f1f4f8; font-size: 19px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .detail-item { min-width: 0; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .detail-item span { display: block; margin-bottom: 5px; color: #8791a3; font-size: 10px; font-weight: 750; letter-spacing: .7px; text-transform: uppercase; }
+    .detail-item p { margin: 0; color: #35425a; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .detail-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 21px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .footer { padding: 19px 0 25px; color: #8993a4; text-align: center; font-size: 11px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 30; max-width: min(390px, calc(100% - 44px)); padding: 13px 16px; border-radius: 11px; color: #fff; background: #1c2b45; box-shadow: 0 12px 30px rgba(0,0,0,.2); font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-column { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+      .side-card + .side-card { margin-top: 0; }
+    }
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 24px, 560px); }
+      .topbar-inner { min-height: 68px; flex-wrap: wrap; padding: 12px 0; }
+      .brand-mark { width: 37px; height: 37px; }
+      .nav { width: 100%; }
+      .nav-btn { flex: 1; padding: 10px 8px; }
+      main { padding-top: 25px; }
+      .hero { align-items: flex-start; flex-direction: column; gap: 13px; }
+      .panel-head, .form-body { padding-left: 17px; padding-right: 17px; }
+      .two-col, .side-column { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .filters { grid-template-columns: 1fr; }
+      .admin-toolbar { align-items: flex-start; flex-direction: column; }
+      .form-actions { align-items: stretch; flex-direction: column-reverse; }
+      .form-actions .btn { width: 100%; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .detail-item.full { grid-column: auto; }
+    }
+  
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Student Voice</h1>
-    <p>Student Complaint and Suggestion Box</p>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><div class="brand-mark">V</div><div><p class="brand-name">Student Voice</p><p class="brand-sub">Your feedback can make a difference</p></div></div>
+    </div>
   </header>
-  <main>
-    <h2>Submit your feedback</h2>
-    <form id="feedbackForm">
-      <fieldset>
-        <legend>Feedback type</legend>
-        <label><input type="radio" name="type" value="Complaint" checked> Complaint</label>
-        <label><input type="radio" name="type" value="Suggestion"> Suggestion</label>
-      </fieldset>
-      <p>
-        <label for="category">Category</label><br>
-        <select id="category" name="category" required>
-          <option value="">Choose a category</option>
-          <option>Classroom and Facilities</option>
-          <option>Cleanliness and Sanitation</option>
-          <option>Teaching and Learning</option>
-          <option>Student Services</option>
-          <option>School Activities</option>
-          <option>Safety and Security</option>
-          <option>Other</option>
-        </select>
-      </p>
-      <p>
-        <label for="subject">Subject</label><br>
-        
-        <input id="subject" name="subject" type="text" maxlength="90" required>
-      </p>
-      <p>
-        <label for="description">Description</label><br>
-        <textarea id="description" name="description" minlength="10" maxlength="1500" required></textarea>
-      </p>
-      <button type="submit">Submit feedback</button>
-    </form>
+  <main class="shell">
+    <section class="view">
+      <div class="hero"><div><p class="eyebrow">STUDENT FEEDBACK PORTAL</p><h1>Speak up. Help improve our school.</h1><p class="hero-copy">Share a concern or an idea with the school.</p></div></div>
+      <div class="layout">
+        <section class="panel">
+          <div class="panel-head"><h2>Submit your feedback</h2><p>Complete the form below.</p></div>
+          <div class="form-body">
+            <form id="feedbackForm">
+              <div class="field"><span class="field-label">Feedback type</span><div class="type-options">
+                <label class="type-option"><input type="radio" name="type" value="Complaint" checked><span><strong>Complaint</strong><small>Report a concern</small></span></label>
+                <label class="type-option"><input type="radio" name="type" value="Suggestion"><span><strong>Suggestion</strong><small>Share an idea</small></span></label>
+              </div></div>
+              <div class="field"><label for="category">Category</label><select class="select" id="category" name="category" required><option value="">Choose a category</option><option>Classroom and Facilities</option><option>Cleanliness and Sanitation</option><option>Teaching and Learning</option><option>Student Services</option><option>School Activities</option><option>Safety and Security</option><option>Other</option></select></div>
+              <div class="field"><label for="subject">Subject</label><input class="input" id="subject" name="subject" maxlength="90" required></div>
+              <div class="field"><label for="description">Description</label><textarea class="textarea" id="description" name="description" minlength="10" maxlength="1500" required></textarea></div>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Submit feedback</button></div>
+            </form>
+          </div>
+        </section>
+        <aside class="panel side-card"><h3>Before you submit</h3><p class="notice">Do not include passwords or sensitive personal information.</p></aside>
+      </div>
+    </section>
   </main>
 </body>
 </html>
