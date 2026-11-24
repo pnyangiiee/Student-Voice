@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Voice is a simple student complaint and suggestion box prototype.">
   <title>Student Voice | Feedback Portal</title>
   <style>
     :root {
@@ -156,37 +158,192 @@
       .detail-grid { grid-template-columns: 1fr; }
       .detail-item.full { grid-column: auto; }
     }
-  
   </style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <div class="brand"><div class="brand-mark">V</div><div><p class="brand-name">Student Voice</p><p class="brand-sub">Your feedback can make a difference</p></div></div>
+      <div class="brand" aria-label="Student Voice home">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div>
+          <p class="brand-name">Student Voice</p>
+          <p class="brand-sub">Your feedback can make a difference</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-btn active" id="studentTab" type="button">Student Portal</button>
+        <button class="nav-btn" id="adminTab" type="button">Admin Dashboard</button>
+      </nav>
     </div>
   </header>
+
   <main class="shell">
-    <section class="view">
-      <div class="hero"><div><p class="eyebrow">STUDENT FEEDBACK PORTAL</p><h1>Speak up. Help improve our school.</h1><p class="hero-copy">Share a concern or an idea with the school.</p></div></div>
+    <section class="view" id="studentView">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">STUDENT FEEDBACK PORTAL</p>
+          <h1>Speak up. Help improve our school.</h1>
+          <p class="hero-copy">Share a concern or an idea with the school. Your feedback helps identify what is working and what needs attention.</p>
+        </div>
+        <div class="privacy-pill"><span aria-hidden="true">✓</span> Anonymous option available</div>
+      </div>
+
       <div class="layout">
         <section class="panel">
-          <div class="panel-head"><h2>Submit your feedback</h2><p>Complete the form below.</p></div>
+          <div class="panel-head">
+            <h2>Submit your feedback</h2>
+            <p>Complete the form below. Fields marked with <span class="required">*</span> are required.</p>
+          </div>
           <div class="form-body">
+            <div class="success-message" id="successMessage" role="status" aria-live="polite"></div>
             <form id="feedbackForm">
-              <div class="field"><span class="field-label">Feedback type</span><div class="type-options">
-                <label class="type-option"><input type="radio" name="type" value="Complaint" checked><span><strong>Complaint</strong><small>Report a concern</small></span></label>
-                <label class="type-option"><input type="radio" name="type" value="Suggestion"><span><strong>Suggestion</strong><small>Share an idea</small></span></label>
-              </div></div>
-              <div class="field"><label for="category">Category</label><select class="select" id="category" name="category" required><option value="">Choose a category</option><option>Classroom and Facilities</option><option>Cleanliness and Sanitation</option><option>Teaching and Learning</option><option>Student Services</option><option>School Activities</option><option>Safety and Security</option><option>Other</option></select></div>
-              <div class="field"><label for="subject">Subject</label><input class="input" id="subject" name="subject" maxlength="90" required></div>
-              <div class="field"><label for="description">Description</label><textarea class="textarea" id="description" name="description" minlength="10" maxlength="1500" required></textarea></div>
-              <div class="form-actions"><button class="btn btn-primary" type="submit">Submit feedback</button></div>
+              <div class="field">
+                <span class="field-label">What would you like to submit? <span class="required">*</span></span>
+                <div class="type-options">
+                  <label class="type-option">
+                    <input type="radio" name="type" value="Complaint" checked>
+                    <span><strong>Complaint</strong><small>Report a concern or problem</small></span>
+                  </label>
+                  <label class="type-option">
+                    <input type="radio" name="type" value="Suggestion">
+                    <span><strong>Suggestion</strong><small>Share an idea for improvement</small></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="category">Category <span class="required">*</span></label>
+                <select class="select" id="category" name="category" required>
+                  <option value="">Choose a category</option>
+                  <option>Classroom and Facilities</option>
+                  <option>Cleanliness and Sanitation</option>
+                  <option>Teaching and Learning</option>
+                  <option>Student Services</option>
+                  <option>School Activities</option>
+                  <option>Safety and Security</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="subject">Subject <span class="required">*</span></label>
+                <input class="input" id="subject" name="subject" type="text" maxlength="90" placeholder="Write a short title for your feedback" required>
+                <span class="hint">Use a clear title that describes your concern or idea.</span>
+              </div>
+
+              <div class="field">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea class="textarea" id="description" name="description" minlength="10" maxlength="1500" placeholder="Explain your complaint or suggestion. Include useful details, but avoid sharing passwords or other sensitive information." required></textarea>
+                <span class="hint">Please provide at least 10 characters. Maximum 1,500 characters.</span>
+              </div>
+
+              <div class="field">
+                <div class="anonymous-box">
+                  <input id="anonymous" name="anonymous" type="checkbox" checked>
+                  <div>
+                    <strong>Submit anonymously</strong>
+                    <p>Your name and student ID will not be included in this submission. You can uncheck this option to identify yourself.</p>
+                  </div>
+                </div>
+                <div class="identity-fields" id="identityFields" hidden>
+                  <div class="two-col">
+                    <div class="field" style="margin:0">
+                      <label for="studentName">Full name <span class="required">*</span></label>
+                      <input class="input" id="studentName" name="studentName" type="text" maxlength="80" placeholder="Your full name" disabled>
+                    </div>
+                    <div class="field" style="margin:0">
+                      <label for="studentId">Student ID <span style="color:#8791a3;font-weight:500">(optional)</span></label>
+                      <input class="input" id="studentId" name="studentId" type="text" maxlength="30" placeholder="Your student ID" disabled>
+                    </div>
+                  </div>
+                  <span class="hint">Only provide identifying details if you are comfortable being identified.</span>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-secondary" id="clearFormButton" type="button">Clear form</button>
+                <button class="btn btn-primary" type="submit">Submit feedback <span aria-hidden="true">→</span></button>
+              </div>
             </form>
           </div>
         </section>
-        <aside class="panel side-card"><h3>Before you submit</h3><p class="notice">Do not include passwords or sensitive personal information.</p></aside>
+
+        <aside class="side-column">
+          <section class="panel side-card">
+            <h3>How it works</h3>
+            <div class="step"><div class="step-num">1</div><div><strong>Share your feedback</strong><p>Choose complaint or suggestion and describe what you want the school to know.</p></div></div>
+            <div class="step"><div class="step-num">2</div><div><strong>Choose your privacy option</strong><p>Submit anonymously or include your name. Student ID is optional.</p></div></div>
+            <div class="step"><div class="step-num">3</div><div><strong>Feedback is recorded</strong><p>Your submission appears in the prototype's Admin Dashboard for review.</p></div></div>
+          </section>
+          <section class="panel side-card">
+            <h3>Before you submit</h3>
+            <div class="notice"><strong>Prototype privacy notice</strong>This classroom prototype saves entries only in this browser using localStorage. It does not send feedback to the school, and it does not synchronize with other devices. Do not enter real sensitive or urgent complaints.</div>
+          </section>
+        </aside>
       </div>
     </section>
+
+    <section class="view" id="adminView" hidden>
+      <div class="hero">
+        <div>
+          <p class="eyebrow">FEEDBACK MANAGEMENT</p>
+          <h1>Admin Dashboard</h1>
+          <p class="hero-copy">Review the feedback saved in this browser and update each submission's status.</p>
+        </div>
+      </div>
+      <div class="stats" aria-label="Feedback summary">
+        <div class="stat"><span>Total submissions</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>Pending</span><strong id="pendingCount">0</strong></div>
+        <div class="stat"><span>Under review</span><strong id="reviewCount">0</strong></div>
+        <div class="stat"><span>Resolved</span><strong id="resolvedCount">0</strong></div>
+      </div>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>All feedback</h2>
+          <p>Search by subject, category, or submitter. Change a status using the status menu.</p>
+        </div>
+        <div class="filters">
+          <input class="input" id="searchInput" type="search" placeholder="Search feedback..." aria-label="Search feedback">
+          <select class="select" id="typeFilter" aria-label="Filter by feedback type">
+            <option value="all">All types</option>
+            <option value="Complaint">Complaints</option>
+            <option value="Suggestion">Suggestions</option>
+          </select>
+          <select class="select" id="statusFilter" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="table-wrap" id="feedbackTableWrap">
+          <table>
+            <thead><tr><th>Feedback</th><th>Type</th><th>Submitted by</th><th>Date</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="feedbackTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyState" hidden>
+          <div class="empty-icon" aria-hidden="true">▤</div>
+          <strong id="emptyTitle">No feedback yet</strong>
+          <p id="emptyText">Submissions made through the Student Portal on this browser will appear here.</p>
+        </div>
+      </section>
+      <p class="admin-note">Demo limitation: this dashboard is not protected by administrator authentication. It displays only records stored in the current browser's localStorage.</p>
+    </section>
   </main>
-</body>
+
+  <footer class="footer"><div class="shell">Student Voice · Lab 1 community web app prototype</div></footer>
+
+  <div class="modal-backdrop" id="detailModal" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><h3 id="modalTitle">Feedback details</h3><button class="close-btn" id="closeModal" type="button" aria-label="Close details">×</button></div>
+      <div class="detail-grid" id="detailContent"></div>
+      <div class="detail-footer"><span class="hint" id="detailId"></span><button class="btn btn-secondary" id="modalDone" type="button">Close</button></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </body>
 </html>
