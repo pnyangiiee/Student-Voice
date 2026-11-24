@@ -346,91 +346,106 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-  // Add optional anonymous submission. Records are still kept in memory in this stage.
   const STORAGE_KEY = "studentVoiceFeedback";
+  const STATUSES = ["Pending", "Under Review", "Resolved", "Rejected"];
+  const elements = {
+    form: document.getElementById("feedbackForm"), anonymous: document.getElementById("anonymous"),
+    identityFields: document.getElementById("identityFields"), studentName: document.getElementById("studentName"),
+    studentId: document.getElementById("studentId"), studentView: document.getElementById("studentView"),
+    adminView: document.getElementById("adminView"), tableBody: document.getElementById("feedbackTableBody"),
+    search: document.getElementById("searchInput"), typeFilter: document.getElementById("typeFilter"),
+    statusFilter: document.getElementById("statusFilter")
+  };
+
   function loadFeedback() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const parsed = saved ? JSON.parse(saved) : [];
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.error("Could not read feedback:", error);
-      return [];
-    }
+    } catch (error) { console.error("Could not read feedback:", error); return []; }
   }
   function saveFeedback(records) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-      return true;
-    } catch (error) {
-      console.error("Could not save feedback:", error);
-      alert("Could not save. Check browser storage settings.");
-      return false;
-    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); return true; }
+    catch (error) { alert("Could not save. Check browser storage settings."); return false; }
   }
-  let feedbackList = loadFeedback();
-  const form = document.getElementById("feedbackForm");
-  const tableBody = document.getElementById("feedbackTableBody");
-  const studentView = document.getElementById("studentView");
-  const adminView = document.getElementById("adminView");
-  const anonymous = document.getElementById("anonymous");
-  const identityFields = document.getElementById("identityFields");
-  const studentName = document.getElementById("studentName");
-  const studentId = document.getElementById("studentId");
-
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#039;"})[ch]);
+  }
   function updateIdentityFields() {
-    identityFields.hidden = anonymous.checked;
-    studentName.disabled = anonymous.checked;
-    studentId.disabled = anonymous.checked;
-    studentName.required = !anonymous.checked;
-    if (anonymous.checked) { studentName.value = ""; studentId.value = ""; }
+    const hide = elements.anonymous.checked;
+    elements.identityFields.hidden = hide;
+    elements.studentName.disabled = hide;
+    elements.studentId.disabled = hide;
+    elements.studentName.required = !hide;
+    if (hide) { elements.studentName.value = ""; elements.studentId.value = ""; }
   }
-
-  function showView(view) {
+  function switchView(view) {
     const showAdmin = view === "admin";
-    studentView.hidden = showAdmin;
-    adminView.hidden = !showAdmin;
+    elements.studentView.hidden = showAdmin;
+    elements.adminView.hidden = !showAdmin;
     document.getElementById("studentTab").classList.toggle("active", !showAdmin);
     document.getElementById("adminTab").classList.toggle("active", showAdmin);
-    if (showAdmin) renderFeedback();
+    if (showAdmin) renderDashboard();
   }
-
-  function renderFeedback() {
-    tableBody.innerHTML = feedbackList.map(item => `
-      <tr><td><strong>${item.subject}</strong><small>${item.category}</small></td>
-      <td>${item.type}</td><td>${item.anonymous ? "Anonymous" : item.studentName}</td>
-      <td>${new Date(item.createdAt).toLocaleDateString()}</td><td>${item.status}</td><td>Saved in this page session</td></tr>
-    `).join("");
-    document.getElementById("totalCount").textContent = feedbackList.length;
-    document.getElementById("pendingCount").textContent = feedbackList.filter(item => item.status === "Pending").length;
-    document.getElementById("reviewCount").textContent = "0";
-    document.getElementById("resolvedCount").textContent = "0";
-    document.getElementById("feedbackTableWrap").hidden = feedbackList.length === 0;
-    document.getElementById("emptyState").hidden = feedbackList.length > 0;
-  }
-
-  anonymous.addEventListener("change", updateIdentityFields);
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-    if (!form.reportValidity()) return;
-    const data = new FormData(form);
-    const isAnonymous = anonymous.checked;
-    feedbackList.unshift({
-      id: "FB-" + Date.now(), type: data.get("type"), category: data.get("category"),
-      subject: data.get("subject").trim(), description: data.get("description").trim(),
-      anonymous: isAnonymous, studentName: isAnonymous ? "" : studentName.value.trim(),
-      studentId: isAnonymous ? "" : studentId.value.trim(), status: "Pending", createdAt: new Date().toISOString()
+  function renderDashboard() {
+    const all = loadFeedback();
+    document.getElementById("totalCount").textContent = all.length;
+    document.getElementById("pendingCount").textContent = all.filter(item => item.status === "Pending").length;
+    document.getElementById("reviewCount").textContent = all.filter(item => item.status === "Under Review").length;
+    document.getElementById("resolvedCount").textContent = all.filter(item => item.status === "Resolved").length;
+    const query = elements.search.value.trim().toLowerCase();
+    const type = elements.typeFilter.value;
+    const status = elements.statusFilter.value;
+    const filtered = all.filter(item => {
+      const text = [item.subject, item.category, item.studentName, item.studentId, item.description, item.id].join(" ").toLowerCase();
+      return (!query || text.includes(query)) && (type === "all" || item.type === type) && (status === "all" || item.status === status);
     });
-    if (!saveFeedback(feedbackList)) return;
-    form.reset();
-    anonymous.checked = true;
-    updateIdentityFields();
-    renderFeedback();
-    alert("Feedback submitted successfully.");
+    elements.tableBody.innerHTML = filtered.map(item => `
+      <tr>
+        <td class="subject-cell"><strong>${escapeHTML(item.subject)}</strong><small>${escapeHTML(item.category)} · ${escapeHTML(item.id)}</small></td>
+        <td>${escapeHTML(item.type)}</td><td>${item.anonymous ? "Anonymous" : escapeHTML(item.studentName || "Identified")}</td>
+        <td>${new Date(item.createdAt).toLocaleDateString()}</td>
+        <td><select class="status-select" data-status-id="${escapeHTML(item.id)}" aria-label="Update status">
+          ${STATUSES.map(option => `<option value="${option}" ${item.status === option ? "selected" : ""}>${option}</option>`).join("")}
+        </select></td><td>Details available in the next update</td>
+      </tr>`).join("");
+    document.getElementById("feedbackTableWrap").hidden = filtered.length === 0;
+    document.getElementById("emptyState").hidden = filtered.length > 0;
+    document.getElementById("emptyTitle").textContent = all.length ? "No matching feedback" : "No feedback yet";
+    document.getElementById("emptyText").textContent = all.length ? "Try changing your search or filters." : "Submissions made through the Student Portal on this browser will appear here.";
+  }
+  elements.form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!elements.form.reportValidity()) return;
+    const data = new FormData(elements.form);
+    const anonymous = elements.anonymous.checked;
+    const records = loadFeedback();
+    records.unshift({
+      id: "FB-" + Date.now(), type: data.get("type"), category: String(data.get("category") || "").trim(),
+      subject: String(data.get("subject") || "").trim(), description: String(data.get("description") || "").trim(),
+      anonymous, studentName: anonymous ? "" : elements.studentName.value.trim(),
+      studentId: anonymous ? "" : elements.studentId.value.trim(), status: "Pending", createdAt: new Date().toISOString()
+    });
+    if (!saveFeedback(records)) return;
+    elements.form.reset(); elements.anonymous.checked = true; updateIdentityFields();
+    document.getElementById("successMessage").textContent = "Your feedback was saved successfully.";
+    document.getElementById("successMessage").classList.add("show");
+    renderDashboard();
   });
-
-  document.getElementById("studentTab").addEventListener("click", () => showView("student"));
-  document.getElementById("adminTab").addEventListener("click", () => showView("admin"));
+  document.getElementById("studentTab").addEventListener("click", () => switchView("student"));
+  document.getElementById("adminTab").addEventListener("click", () => switchView("admin"));
+  elements.anonymous.addEventListener("change", updateIdentityFields);
+  [elements.search, elements.typeFilter, elements.statusFilter].forEach(control => {
+    control.addEventListener("input", renderDashboard); control.addEventListener("change", renderDashboard);
+  });
+  elements.tableBody.addEventListener("change", event => {
+    const id = event.target.dataset.statusId;
+    if (!id) return;
+    const records = loadFeedback();
+    const item = records.find(record => record.id === id);
+    if (!item || !STATUSES.includes(event.target.value)) return;
+    item.status = event.target.value;
+    if (saveFeedback(records)) renderDashboard();
+  });
   updateIdentityFields();
 </script>
 </body>
