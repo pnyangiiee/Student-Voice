@@ -1,21 +1,42 @@
-# AI Prompt Log — Student Voice
+# Student Voice
 
-Use this file to record AI prompts used while planning, building, testing, and documenting the project. This is a starter log based on the project-planning conversations. Add the prompts you actually use during your own development and remove anything that does not reflect your work.
+Student Voice is a student complaint and suggestion
+box system designed to help students communicate
+their concerns and ideas to the school.
 
-| No. | Prompt / request | Purpose | Result used |
-|---|---|---|---|
-| 1 | "What if student complaint & suggestion box system?" | Choose a community web app idea | Selected Student Voice as the project concept |
-| 2 | "Should students be allowed to submit complaints and suggestions anonymously?" | Decide the privacy option | Added anonymous and identified submission modes |
-| 3 | "I want I can push in GitHub 6+ and merge" | Plan the version-control workflow | Planned incremental commits and one feature branch for a Pull Request |
-| 4 | "Can I get the full code so that I can check the system?" | Create a runnable prototype | Built the single-page HTML/CSS/JavaScript prototype |
-| 5 | "Can I get the code for each commit?" | Learn development in stages | Prepared progressive full-page code snapshots |
+## Community Problem
 
-## Add your own prompts
+Students sometimes have difficulty expressing their
+complaints and suggestions to school administrators.
 
-For every new AI prompt you use during development, add a row with:
+## FR-01: Student Feedback Submission
 
-- The prompt you actually typed (or a faithful summary).
-- Why you used it.
-- What suggestion or code you used, changed, or rejected.
+The system allows students to submit complaints and
+suggestions with an option to remain anonymous.
 
-Do not list AI-generated code as your own original work. Review, test, and understand any code you use.
+## Features
+
+- Submit complaints
+- Submit suggestions
+- Anonymous submissions
+- Feedback management
+- Search and filtering
+- Update feedback status
+
+## Technologies
+
+- HTML
+- CSS
+- JavaScript
+- localStorage
+
+## How to Run
+
+1. Download or clone the repository.
+2. Open index.html in your browser.
+3. Submit a complaint or suggestion.
+4. View submissions in the admin dashboard.
+
+## Project Version
+
+v0.1.0
